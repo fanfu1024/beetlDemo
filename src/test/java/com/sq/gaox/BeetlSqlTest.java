@@ -2,6 +2,7 @@ package com.sq.gaox;
 
 import com.sq.gaox.bean.SysTeacher;
 import com.sq.gaox.bean.User;
+import com.sq.gaox.bettl.mapper.SysTeacherMapper;
 import org.beetl.sql.core.*;
 import org.beetl.sql.core.db.DBStyle;
 import org.beetl.sql.core.db.MySqlStyle;
@@ -49,7 +50,7 @@ public class BeetlSqlTest {
        List<SysTeacher> teachers= sqlManager.query(SysTeacher.class).andEq("name","lisi10").select();
        Assert.assertTrue(teachers.size()>0);
        SysTeacher teacher=sqlManager.unique(SysTeacher.class,4003);
-       Assert.assertEquals(4003,teacher.getId());
+       Assert.assertNotNull(teacher);
        SysTeacher teacher1=sqlManager.single(SysTeacher.class,1);
        Assert.assertNull(teacher1);
        List<SysTeacher> list1=sqlManager.all(SysTeacher.class);
@@ -58,7 +59,21 @@ public class BeetlSqlTest {
        Assert.assertNotNull(list2);
        Long total=sqlManager.allCount(SysTeacher.class);
        Assert.assertNotNull(total);
+      List<SysTeacher> list3 =sqlManager.query(SysTeacher.class).andLike("name","li%").select();
+      Assert.assertNotNull(list3);
+      SysTeacher sysTeacher=new SysTeacher();
+      sysTeacher.setName("lisi11");
+      List<SysTeacher> list4=sqlManager.template(sysTeacher);
+      Assert.assertNotNull(list4);
 
+
+    }
+
+    @Test
+    public void selectByMapper(){
+        SysTeacherMapper mapper=sqlManager.getMapper(SysTeacherMapper.class);
+        List<SysTeacher> list=mapper.selectByCon("lisi10");
+        Assert.assertNotNull(list);
     }
     @Test
     public void insert() {

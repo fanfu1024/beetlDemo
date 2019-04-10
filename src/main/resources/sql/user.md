@@ -33,9 +33,9 @@ value
 @}
 @}
 
-delete
-===
-delete from sys_teacher 
+
+
+
 
 
 

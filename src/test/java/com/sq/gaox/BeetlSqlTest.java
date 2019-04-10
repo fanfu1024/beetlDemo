@@ -17,7 +17,7 @@ import java.util.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class BeetlDemoApplicationTests {
+public class BeetlSqlTest {
     private SQLManager sqlManager=null;
     @Before
     public void before(){
@@ -28,14 +28,37 @@ public class BeetlDemoApplicationTests {
          sqlManager=new SQLManager(mysql,loader,source,nc,new Interceptor[]{new DebugInterceptor()});
     }
 
+    @Test
+    public void createTable(){
 
+        Map map=new HashMap();
+        map.put("param0","sys_student");
+        map.put("param1","id");
+        map.put("param2","name");
+        map.put("param3","age");
+        map.put("param4","create_time");
+        int a=sqlManager.insert("user.createTable",map,null,null);
+        System.out.println(a);
+    }
     @Test
     public void select(){
-
         User query = new User();
         query.setName("gx");
         List<User> list = sqlManager.select("user.select",User.class,query);
         Assert.assertTrue(list.size()>0);
+       List<SysTeacher> teachers= sqlManager.query(SysTeacher.class).andEq("name","lisi10").select();
+       Assert.assertTrue(teachers.size()>0);
+       SysTeacher teacher=sqlManager.unique(SysTeacher.class,4003);
+       Assert.assertEquals(4003,teacher.getId());
+       SysTeacher teacher1=sqlManager.single(SysTeacher.class,1);
+       Assert.assertNull(teacher1);
+       List<SysTeacher> list1=sqlManager.all(SysTeacher.class);
+       Assert.assertNotNull(list1);
+       List<SysTeacher> list2=sqlManager.all(SysTeacher.class,1,10);
+       Assert.assertNotNull(list2);
+       Long total=sqlManager.allCount(SysTeacher.class);
+       Assert.assertNotNull(total);
+
     }
     @Test
     public void insert() {
@@ -99,17 +122,6 @@ public class BeetlDemoApplicationTests {
         System.out.println(a);
         System.out.println(System.currentTimeMillis()-b);
     }
-    @Test
-    public void createTable(){
 
-        Map map=new HashMap();
-        map.put("param0","sys_student");
-        map.put("param1","id");
-        map.put("param2","name");
-        map.put("param3","age");
-        map.put("param4","create_time");
-        int a=sqlManager.insert("user.createTable",map,null,null);
-        System.out.println(a);
-    }
 
 }

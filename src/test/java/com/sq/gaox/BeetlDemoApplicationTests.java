@@ -1,56 +1,109 @@
 package com.sq.gaox;
 
+import com.sq.gaox.bean.SysTeacher;
 import com.sq.gaox.bean.User;
-import com.sq.gaox.util.DateUtil;
 import org.beetl.sql.core.*;
 import org.beetl.sql.core.db.DBStyle;
 import org.beetl.sql.core.db.MySqlStyle;
 import org.beetl.sql.ext.DebugInterceptor;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class BeetlDemoApplicationTests {
-
-    @Test
-    public void contextLoads() {
-    }
-    @Test
-    public void beetlTest(){
+    private SQLManager sqlManager=null;
+    @Before
+    public void before(){
         ConnectionSource source= ConnectionSourceHelper.getSimple("com.mysql.jdbc.Driver","jdbc:mysql://localhost:3306/gx?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC","root","root");
         DBStyle mysql= new MySqlStyle();
         SQLLoader loader=new ClasspathLoader("/sql");
         UnderlinedNameConversion nc=new UnderlinedNameConversion();
-        SQLManager sqlManager=new SQLManager(mysql,loader,source,nc,new Interceptor[]{new DebugInterceptor()});
+         sqlManager=new SQLManager(mysql,loader,source,nc,new Interceptor[]{new DebugInterceptor()});
+    }
+
+
+    @Test
+    public void select(){
+
         User query = new User();
         query.setName("gx");
-        List<User> list2 = sqlManager.select("user.select",User.class,query);
-        User a=new User();
-        a.setName("gaox");
-        a.setAge(19);
+        List<User> list = sqlManager.select("user.select",User.class,query);
+        Assert.assertTrue(list.size()>0);
+    }
+    @Test
+    public void insert() {
+        User user=new User();
+        user.setName("zm");
+        user.setAge(19);
+        user.setCreateDate(new Date());
+        int a=sqlManager.insert(User.class,user);
+        Assert.assertTrue(a>0);
+    }
+    @Test
+    public void insert2(){
+        User user=new User();
+        user.setName("lisi");
+        user.setAge(19);
+        user.setCreateDate(new Date());
+        int a=sqlManager.insert(user);
+        System.out.println(a);
+    }
+    @Test
+    public void insert3(){
+        SysTeacher user=new SysTeacher();
+        user.setName("lisi");
+        user.setAge(19);
+        user.setCreateTime(new Date());
+        int a=sqlManager.insert(user);
+        System.out.println(a);
+    }
+    @Test
+    public void insertBatch(){
+        List<SysTeacher> list=new ArrayList<>();
+        SysTeacher teacher=null;
+        for (int i = 0; i < 1000; i++) {
+            teacher=new SysTeacher();
+            teacher.setName("lisi"+i);
+            teacher.setAge(19);
+            teacher.setCreateTime(new Date());
+            list.add(teacher);
+        }
+        long b=System.currentTimeMillis();
+        int[] a=sqlManager.insertBatch(SysTeacher.class,list);
+        System.out.println(a.length);
+        System.out.println(System.currentTimeMillis()-b);
+    }
+    @Test
+    public void insertBatch2(){
+        List<SysTeacher> list=new ArrayList<>();
+        SysTeacher teacher=null;
+        for (int i = 0; i < 10000; i++) {
+            teacher=new SysTeacher();
+            teacher.setName("lisi"+i);
+            teacher.setAge(19);
+            teacher.setCreateTime(new Date());
+            list.add(teacher);
+        }
+        long b=System.currentTimeMillis();
+
         Map map=new HashMap();
-        map.put("name","gaox");
-        map.put("age",19);
-        sqlManager.insert("user.insert",map,null,null);
-        System.out.println(list2.size());
+        map.put("list",list);
+        int a=sqlManager.insert("user.insertBatch",map,null,null);
+        System.out.println(a);
+        System.out.println(System.currentTimeMillis()-b);
     }
     @Test
     public void createTable(){
-        ConnectionSource source= ConnectionSourceHelper.getSimple("com.mysql.jdbc.Driver","jdbc:mysql://localhost:3306/gx?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC","root","root");
-        DBStyle mysql= new MySqlStyle();
-        SQLLoader loader=new ClasspathLoader("/sql");
-        UnderlinedNameConversion nc=new UnderlinedNameConversion();
-        SQLManager sqlManager=new SQLManager(mysql,loader,source,nc,new Interceptor[]{new DebugInterceptor()});
+
         Map map=new HashMap();
-        map.put("param0","dy"+ DateUtil.dateFormat(new Date(),DateUtil.DATE_TIME_PATTERN2));
+        map.put("param0","sys_student");
         map.put("param1","id");
         map.put("param2","name");
         map.put("param3","age");
@@ -58,25 +111,5 @@ public class BeetlDemoApplicationTests {
         int a=sqlManager.insert("user.createTable",map,null,null);
         System.out.println(a);
     }
-    @Test
-    public void insertBatch(){
-        ConnectionSource source= ConnectionSourceHelper.getSimple("com.mysql.jdbc.Driver","jdbc:mysql://localhost:3306/gx?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC","root","root");
-        DBStyle mysql= new MySqlStyle();
-        SQLLoader loader=new ClasspathLoader("/sql");
-        UnderlinedNameConversion nc=new UnderlinedNameConversion();
-        SQLManager sqlManager=new SQLManager(mysql,loader,source,nc,new Interceptor[]{new DebugInterceptor()});
-        Map map=new HashMap();
-        map.put("param0","dy20190409164911");
-        map.put("param1","name");
-        map.put("param2","age");
-        map.put("name","zm");
-        map.put("age",29);
-        int a=0;
-        long s=System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
-           a=a+sqlManager.insert("user.insertBatch",map,null,null);
-        }
-        System.out.println(System.currentTimeMillis()-s);
-        System.out.println(a);
-    }
+
 }

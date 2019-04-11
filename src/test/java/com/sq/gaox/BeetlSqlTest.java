@@ -5,6 +5,7 @@ import com.sq.gaox.bean.User;
 import com.sq.gaox.bettl.mapper.SysTeacherMapper;
 import org.beetl.sql.core.*;
 import org.beetl.sql.core.db.DBStyle;
+import org.beetl.sql.core.db.KeyHolder;
 import org.beetl.sql.core.db.MySqlStyle;
 import org.beetl.sql.ext.DebugInterceptor;
 import org.junit.Assert;
@@ -113,10 +114,9 @@ public class BeetlSqlTest {
             teacher.setCreateTime(new Date());
             list.add(teacher);
         }
-        long b=System.currentTimeMillis();
         int[] a=sqlManager.insertBatch(SysTeacher.class,list);
         System.out.println(a.length);
-        System.out.println(System.currentTimeMillis()-b);
+
     }
     @Test
     public void insertBatch2(){
@@ -136,6 +136,28 @@ public class BeetlSqlTest {
         int a=sqlManager.insert("user.insertBatch",map,null,null);
         System.out.println(a);
         System.out.println(System.currentTimeMillis()-b);
+    }
+    @Test
+    public void insertBatch3(){
+        List<Map<String,Object>> list=new ArrayList<>();
+        Map<String,Object> map=null;
+        for (int i = 0; i < 1; i++) {
+            map=new HashMap<>();
+            map.put("name","zhangsan"+i);
+            map.put("age",18);
+            list.add(map);
+        }
+        Map map2=new HashMap();
+        map2.put("tableName","sys_teacher");
+        Set<String> columns=new HashSet<>();
+        columns.add("name");
+        columns.add("age");
+        map2.put("columns",columns);
+        map2.put("list",list);
+        KeyHolder keyHolder=new KeyHolder();
+        int a=sqlManager.insert("sysTeacher.insertBatch",map2,keyHolder,"id");
+        System.out.println(keyHolder.getLong());
+
     }
 
 
